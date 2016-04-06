@@ -3165,16 +3165,46 @@ adapters.forEach(function (adapter) {
       });
     }
     
-    it('#2709 revpos', function (done) {
+    it('#2709 add `revpos` with putAttachment', function (done) {
       var db = new PouchDB(dbs.name);
-      db.putAttachment('a', 'one', '', 'b25l', 'text/plain', function (_, result) {
-        db.putAttachment('a', 'two', result.rev, 'dHdv', 'text/plain', function () {
+      db.putAttachment('a', 'one', '', testUtils.btoa('one'), 'text/plain', function (_, result) {
+        db.putAttachment('a', 'two', result.rev, testUtils.btoa('two'), 'text/plain', function () {
           db.get('a', function (err, doc) {
             should.exist(doc._attachments.one.revpos);
             doc._attachments.one.revpos.should.equal(1);
             should.exist(doc._attachments.two.revpos);
             doc._attachments.two.revpos.should.equal(2);
             done();
+          });
+        });
+      });
+    });
+    
+    it('#2709 add `revpos` with inline attachment', function (done) {
+      var db = new PouchDB(dbs.name);
+      var doc = {
+        _id: 'a',
+        _attachments: {
+          one: {
+            content_type: 'text/plain',
+            data: testUtils.btoa('one')
+          }
+        }
+      }
+      db.put(doc, function () {
+        db.get('a', function (err, doc) {
+          doc._attachments.two = {
+            content_type: 'text/plain',
+            data: testUtils.btoa('one')
+          }
+          db.put(doc, function () {
+            db.get('a', function (err, doc) {
+              should.exist(doc._attachments.one.revpos);
+              doc._attachments.one.revpos.should.equal(1);
+              should.exist(doc._attachments.two.revpos);
+              doc._attachments.two.revpos.should.equal(2);
+              done();
+            });
           });
         });
       });
