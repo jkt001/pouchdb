@@ -3164,6 +3164,21 @@ adapters.forEach(function (adapter) {
         });
       });
     }
+    
+    it('#2709 revpos', function (done) {
+      var db = new PouchDB(dbs.name);
+      db.putAttachment('a', 'one', '', 'b25l', 'text/plain', function (_, result) {
+        db.putAttachment('a', 'two', result.rev, 'dHdv', 'text/plain', function () {
+          db.get('a', function (err, doc) {
+            should.exist(doc._attachments.one.revpos);
+            doc._attachments.one.revpos.should.equal(1);
+            should.exist(doc._attachments.two.revpos);
+            doc._attachments.two.revpos.should.equal(2);
+            done();
+          });
+        });
+      });
+    });
   });
 });
 
