@@ -296,13 +296,14 @@ function idbBulkDocs(dbOpts, req, opts, api, idb, idbChanges, callback) {
       collectResults();
     }
 
+    var revpos = parseInt(winningRev, 10);
     attachments.forEach(function (key) {
       var att = docInfo.data._attachments[key];
       if (!att.stub) {
         var data = att.data;
         delete att.data;
         var digest = att.digest;
-        saveAttachment(digest, data, attachmentSaved);
+        saveAttachment(digest, revpos, data, attachmentSaved);
       } else {
         numDone++;
         collectResults();
@@ -349,7 +350,7 @@ function idbBulkDocs(dbOpts, req, opts, api, idb, idbChanges, callback) {
     }
   }
 
-  function saveAttachment(digest, data, callback) {
+  function saveAttachment(digest, revpos, data, callback) {
 
 
     var getKeyReq = attachStore.count(digest);
@@ -360,6 +361,7 @@ function idbBulkDocs(dbOpts, req, opts, api, idb, idbChanges, callback) {
       }
       var newAtt = {
         digest: digest,
+        revpos: revpos,
         body: data
       };
       var putReq = attachStore.put(newAtt);

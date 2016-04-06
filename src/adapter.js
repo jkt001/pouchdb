@@ -322,12 +322,10 @@ AbstractPouchDB.prototype.putAttachment =
   }
 
   function createAttachment(doc) {
-    var prevrevpos = '_rev' in doc ? parseInt(doc._rev, 10) : 0
     doc._attachments = doc._attachments || {};
     doc._attachments[attachmentId] = {
       content_type: type,
-      data: blob,
-      revpos: ++prevrevpos
+      data: blob
     };
     return api.put(doc);
   }
